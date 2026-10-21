@@ -1,0 +1,12 @@
+[Bb]in/
+[Oo]bj/
+[Aa]rtifacts/
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+[Tt]est[Rr]esult*/
+*.coverage
+*.log
+.DS_Store
