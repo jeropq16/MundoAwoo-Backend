@@ -20,10 +20,14 @@ public class PerfilController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(PerfilUsuarioDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PerfilUsuarioDto>> Obtener(CancellationToken cancellationToken)
     {
         // El cliente no elige un UsuarioId por URL o query string: usamos el token validado.
-        if (!IntentarObtenerUsuarioId(out Guid usuarioId))
+        if (!UsuarioAutenticado.IntentarObtenerId(User, out Guid usuarioId))
             return Forbid();
 
         PerfilUsuarioDto perfil = await _perfiles.ObtenerAsync(usuarioId, cancellationToken);
@@ -31,10 +35,15 @@ public class PerfilController : ControllerBase
     }
 
     [HttpPut]
+    [ProducesResponseType(typeof(PerfilUsuarioDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PerfilUsuarioDto>> Actualizar(
         [FromBody] ActualizarPerfilDto datos, CancellationToken cancellationToken)
     {
-        if (!IntentarObtenerUsuarioId(out Guid usuarioId))
+        if (!UsuarioAutenticado.IntentarObtenerId(User, out Guid usuarioId))
             return Forbid();
 
         // Application valida con Domain y confirma el guardado antes de responder.
@@ -42,14 +51,4 @@ public class PerfilController : ControllerBase
         return Ok(perfil);
     }
 
-    private bool IntentarObtenerUsuarioId(out Guid usuarioId)
-    {
-        usuarioId = Guid.Empty;
-        var identificadores = User.FindAll("sub").ToList();
-
-        // 'sub' deberá ser el Usuario.Id del dominio. Rechazamos una identidad ambigua.
-        return identificadores.Count == 1
-            && Guid.TryParse(identificadores[0].Value, out usuarioId)
-            && usuarioId != Guid.Empty;
-    }
 }

@@ -9,6 +9,10 @@ public interface IItemDeAvatarRepository
     // Que exista en el catálogo no significa que el usuario lo tenga desbloqueado.
     Task<ItemDeAvatar?> ObtenerPorIdAsync(Guid itemId, CancellationToken cancellationToken = default);
 
+    // Recupera los datos visuales de los ítems equipados en una sola consulta.
+    Task<IReadOnlyList<ItemDeAvatar>> ObtenerPorIdsAsync(
+        IReadOnlyCollection<Guid> itemIds, CancellationToken cancellationToken = default);
+
     // Filtra por Categoria.Id (Guid), no por el enum TipoCategoria.
     // Devuelve una lista vacía si no hay coincidencias, incluso si la categoría no existe.
     Task<IReadOnlyList<ItemDeAvatar>> ObtenerPorCategoriaAsync(

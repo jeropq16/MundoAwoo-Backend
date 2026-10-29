@@ -1,5 +1,7 @@
 # Paso 3: MySQL, relaciones y migraciones
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 ## Decisión y estado
 
 La base de datos elegida es **MySQL**, reemplazando la propuesta inicial de PostgreSQL. Usaremos MySQL Community Server 8.4 LTS y Workbench como cliente visual. El proyecto usa EF Core 9.0.16, Pomelo 9.0.0 y una herramienta local dotnet-ef 9.0.16. Pomelo declara compatibilidad con EF Core 9 y pruebas con MySQL 8.0/8.4.

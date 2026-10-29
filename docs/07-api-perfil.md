@@ -1,5 +1,7 @@
 # API de perfil: acceso propio, JWT y errores
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 Esta guía describe el paso de protección del perfil. Registro y login se implementaron después: consulta [la guía de autenticación](08-registro-login.md) para emitir tokens con credenciales y aplicar la nueva migración.
 
 ## 1. Alcance de este paso

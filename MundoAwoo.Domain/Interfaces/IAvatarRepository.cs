@@ -2,7 +2,7 @@ using MundoAwoo.Domain.Entities;
 
 namespace MundoAwoo.Domain.Interfaces;
 
-// El avatar controla sus ítems equipados: los cargamos como parte del mismo agregado.
+// La aplicación controla los ítems equipados; los cargamos junto con el avatar.
 public interface IAvatarRepository
 {
     // Busca el avatar de un usuario e incluye todos sus ItemsEquipados.

@@ -29,8 +29,5 @@ public class AvatarConfiguration : IEntityTypeConfiguration<Avatar>
             .WithOne()
             .HasForeignKey(item => item.AvatarId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(avatar => avatar.ItemsEquipados)
-            .HasField("_itemsEquipados")
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

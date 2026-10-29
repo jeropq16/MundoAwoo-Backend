@@ -9,6 +9,7 @@ namespace MundoAwoo.Api.Security;
 public static class AutenticacionJwt
 {
     public const string PoliticaPerfilPropio = "PerfilPropio";
+    public const string PoliticaAdministrador = "Administrador";
 
     public static void Registrar(IServiceCollection services, IConfiguration configuration)
     {
@@ -77,6 +78,11 @@ public static class AutenticacionJwt
             {
                 policy.RequireAuthenticatedUser();
                 policy.RequireClaim("sub");
+            });
+            options.AddPolicy(PoliticaAdministrador, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.AddRequirements(new AdministradorRequirement());
             });
         });
     }

@@ -22,6 +22,17 @@ public class ItemDeAvatarRepository : IItemDeAvatarRepository
             .SingleOrDefaultAsync(item => item.Id == itemId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<ItemDeAvatar>> ObtenerPorIdsAsync(
+        IReadOnlyCollection<Guid> itemIds, CancellationToken cancellationToken = default)
+    {
+        if (itemIds.Count == 0) return [];
+
+        return await _contexto.ItemsDeAvatar
+            .AsNoTracking()
+            .Where(item => itemIds.Contains(item.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<ItemDeAvatar>> ObtenerPorCategoriaAsync(
         Guid categoriaId, CancellationToken cancellationToken = default)
     {

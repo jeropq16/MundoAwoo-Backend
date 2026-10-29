@@ -6,16 +6,18 @@ using MundoAwoo.Domain.Interfaces;
 
 namespace MundoAwoo.Application.Services;
 
-// Coordina el caso de uso. Las reglas siguen en Domain y el SQL en Infrastructure.
+// Coordina el caso de uso y valida los cambios; SQL permanece en Infrastructure.
 public class PerfilService : IPerfilService
 {
     private readonly IUsuarioRepository _usuarios;
     private readonly IUnitOfWork _unidadDeTrabajo;
+    private readonly IUsuarioService _usuarioService;
 
-    public PerfilService(IUsuarioRepository usuarios, IUnitOfWork unidadDeTrabajo)
+    public PerfilService(IUsuarioRepository usuarios, IUnitOfWork unidadDeTrabajo, IUsuarioService usuarioService)
     {
         _usuarios = usuarios;
         _unidadDeTrabajo = unidadDeTrabajo;
+        _usuarioService = usuarioService;
     }
 
     public async Task<PerfilUsuarioDto> ObtenerAsync(
@@ -34,9 +36,7 @@ public class PerfilService : IPerfilService
 
         Usuario usuario = await BuscarUsuarioAsync(usuarioId, cancellationToken);
 
-        // El dominio valida longitudes, rechaza nombres vacíos y quita espacios exteriores.
-        // Si la validación falla, no llegamos a guardar.
-        usuario.ActualizarPerfil(datos.NombreVisible, datos.Biografia);
+        _usuarioService.ActualizarPerfil(usuario, datos.NombreVisible, datos.Biografia);
 
         // El repositorio cargó el usuario con seguimiento: no hace falta llamar a Update.
         // Esperamos el guardado antes de devolver una respuesta de éxito.

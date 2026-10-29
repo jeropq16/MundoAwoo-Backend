@@ -6,4 +6,5 @@ namespace MundoAwoo.Application.Interfaces;
 public interface IJwtTokenService
 {
     AutenticacionRespuestaDto Crear(Guid usuarioId);
+    AutenticacionRespuestaDto Crear(Guid usuarioId, DateTimeOffset sesionExpiraEnUtc);
 }

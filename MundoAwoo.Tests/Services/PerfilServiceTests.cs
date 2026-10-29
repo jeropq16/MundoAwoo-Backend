@@ -1,3 +1,4 @@
+using static MundoAwoo.Tests.TestData;
 using Microsoft.EntityFrameworkCore;
 using MundoAwoo.Application.DTOs.Perfiles;
 using MundoAwoo.Application.Exceptions;
@@ -15,11 +16,11 @@ public class PerfilServiceTests
     [Fact]
     public async Task Obtener_DevuelveUnaCopiaDelPerfilSinGuardar()
     {
-        var usuario = new Usuario("Fan");
-        usuario.ActualizarPerfil("Fan", "Mi biografía");
+        var usuario = CrearUsuario("Fan");
+        ActualizarPerfil(usuario, "Fan", "Mi biografía");
         var repositorio = new UsuarioRepositoryPrueba(usuario);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
 
         PerfilUsuarioDto resultado = await servicio.ObtenerAsync(usuario.Id);
 
@@ -35,10 +36,10 @@ public class PerfilServiceTests
     [Fact]
     public async Task Actualizar_NormalizaLosDatosYConfirmaUnaSolaVez()
     {
-        var usuario = new Usuario("Fan");
+        var usuario = CrearUsuario("Fan");
         var repositorio = new UsuarioRepositoryPrueba(usuario);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
         using var cancelacion = new CancellationTokenSource();
 
         var resultado = await servicio.ActualizarAsync(usuario.Id, new ActualizarPerfilDto
@@ -64,7 +65,7 @@ public class PerfilServiceTests
     {
         var repositorio = new UsuarioRepositoryPrueba(null);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
 
         await Assert.ThrowsAsync<UsuarioNoEncontradoException>(() => actualizar
             ? servicio.ActualizarAsync(Guid.NewGuid(), new ActualizarPerfilDto { NombreVisible = "Fan" })
@@ -80,7 +81,7 @@ public class PerfilServiceTests
     {
         var repositorio = new UsuarioRepositoryPrueba(null);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
 
         await Assert.ThrowsAsync<ArgumentException>(() => actualizar
             ? servicio.ActualizarAsync(Guid.Empty, new ActualizarPerfilDto { NombreVisible = "Fan" })
@@ -95,7 +96,7 @@ public class PerfilServiceTests
     {
         var repositorio = new UsuarioRepositoryPrueba(null);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => servicio.ActualizarAsync(Guid.NewGuid(), null!));
 
@@ -110,10 +111,10 @@ public class PerfilServiceTests
     [InlineData("Nuevo nombre", null)]
     public async Task Actualizar_TextoInvalido_NoModificaElPerfilNiGuarda(string? nombre, string? biografia)
     {
-        var usuario = new Usuario("Nombre original");
-        usuario.ActualizarPerfil("Nombre original", "Biografía original");
+        var usuario = CrearUsuario("Nombre original");
+        ActualizarPerfil(usuario, "Nombre original", "Biografía original");
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad);
+        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad, new UsuarioService());
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() => servicio.ActualizarAsync(usuario.Id,
             new ActualizarPerfilDto { NombreVisible = nombre!, Biografia = biografia! }));
@@ -128,9 +129,9 @@ public class PerfilServiceTests
     [InlineData(5, 501)]
     public async Task Actualizar_TextoDemasiadoLargo_NoConfirmaCambios(int longitudNombre, int longitudBiografia)
     {
-        var usuario = new Usuario("Fan");
+        var usuario = CrearUsuario("Fan");
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad);
+        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad, new UsuarioService());
 
         await Assert.ThrowsAsync<ArgumentException>(() => servicio.ActualizarAsync(usuario.Id,
             new ActualizarPerfilDto
@@ -146,10 +147,10 @@ public class PerfilServiceTests
     [Fact]
     public async Task Actualizar_SiFallaElGuardado_PropagaElError()
     {
-        var usuario = new Usuario("Fan");
+        var usuario = CrearUsuario("Fan");
         var error = new InvalidOperationException("Fallo de persistencia simulado.");
         var unidad = new UnitOfWorkPrueba { ErrorAlGuardar = error };
-        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad);
+        var servicio = new PerfilService(new UsuarioRepositoryPrueba(usuario), unidad, new UsuarioService());
 
         var recibido = await Assert.ThrowsAsync<InvalidOperationException>(() => servicio.ActualizarAsync(
             usuario.Id, new ActualizarPerfilDto { NombreVisible = "Nuevo nombre" }));
@@ -163,10 +164,10 @@ public class PerfilServiceTests
     [InlineData(true)]
     public async Task OperacionCancelada_NoConsultaNiModifica(bool actualizar)
     {
-        var usuario = new Usuario("Fan");
+        var usuario = CrearUsuario("Fan");
         var repositorio = new UsuarioRepositoryPrueba(usuario);
         var unidad = new UnitOfWorkPrueba();
-        var servicio = new PerfilService(repositorio, unidad);
+        var servicio = new PerfilService(repositorio, unidad, new UsuarioService());
         using var cancelacion = new CancellationTokenSource();
         cancelacion.Cancel();
 
@@ -191,13 +192,13 @@ public class PerfilServiceTests
         await contexto.Database.EnsureCreatedAsync();
         var usuarios = new UsuarioRepository(contexto);
         var unidad = new UnitOfWork(contexto);
-        var primero = new Usuario("Primero");
-        var segundo = new Usuario("Segundo");
+        var primero = CrearUsuario("Primero");
+        var segundo = CrearUsuario("Segundo");
         usuarios.Agregar(primero);
         usuarios.Agregar(segundo);
         await unidad.GuardarCambiosAsync();
         contexto.ChangeTracker.Clear();
-        var servicio = new PerfilService(usuarios, unidad);
+        var servicio = new PerfilService(usuarios, unidad, new UsuarioService());
 
         await servicio.ActualizarAsync(primero.Id, new ActualizarPerfilDto
         {
@@ -237,6 +238,16 @@ public class PerfilServiceTests
             Consultas++;
             UltimoToken = cancellationToken;
             return Task.FromResult(_usuario?.Id == usuarioId ? _usuario : null);
+        }
+
+        public Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException("El servicio de perfil no consulta correos.");
+        }
+
+        public Task<bool> EsAdministradorAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException("El servicio de perfil no consulta administradores.");
         }
 
         public void Agregar(Usuario usuario)

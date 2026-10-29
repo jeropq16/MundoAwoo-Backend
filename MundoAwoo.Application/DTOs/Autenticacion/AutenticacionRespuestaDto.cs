@@ -7,4 +7,6 @@ public class AutenticacionRespuestaDto
     public string Token { get; set; } = string.Empty;
     public string TipoToken { get; set; } = "Bearer";
     public DateTimeOffset ExpiraEnUtc { get; set; }
+    public string RefreshToken { get; set; } = string.Empty;
+    public DateTimeOffset SesionExpiraEnUtc { get; set; }
 }

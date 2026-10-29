@@ -1,3 +1,4 @@
+using static MundoAwoo.Tests.TestData;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -74,8 +75,8 @@ public class PerfilApiFactory : WebApplicationFactory<Program>
         using var scope = Services.CreateScope();
         var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
         await contexto.Database.EnsureCreatedAsync();
-        var primero = new Usuario("Primer fan");
-        var segundo = new Usuario("Segundo fan");
+        var primero = CrearUsuario("Primer fan");
+        var segundo = CrearUsuario("Segundo fan");
         contexto.Usuarios.AddRange(primero, segundo);
         await contexto.SaveChangesAsync();
         PrimerUsuarioId = primero.Id;
@@ -149,7 +150,12 @@ public class PerfilApiFactory : WebApplicationFactory<Program>
     {
         public AutenticacionRespuestaDto Crear(Guid usuarioId)
         {
-            throw new InvalidOperationException("Fallo simulado al emitir el token después de guardar Identity.");
+            throw new InvalidOperationException("Fallo simulado al emitir el token antes de guardar el registro.");
+        }
+
+        public AutenticacionRespuestaDto Crear(Guid usuarioId, DateTimeOffset sesionExpiraEnUtc)
+        {
+            throw new InvalidOperationException("Fallo simulado al emitir el token antes de guardar el registro.");
         }
     }
 }

@@ -12,6 +12,10 @@ public interface IUsuarioRepository
     // al confirmar la unidad de trabajo de la misma operación.
     Task<Usuario?> ObtenerPorIdAsync(Guid usuarioId, CancellationToken cancellationToken = default);
 
+    Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default);
+
+    Task<bool> EsAdministradorAsync(Guid usuarioId, CancellationToken cancellationToken = default);
+
     // Registra un usuario nuevo junto con su perfil e inventario como pendientes de insertar.
     // No confirma la escritura: se guardarán juntos al finalizar el caso de uso.
     void Agregar(Usuario usuario);

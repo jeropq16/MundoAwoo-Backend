@@ -1,5 +1,7 @@
 # Interfaces del dominio: contratos de repositorios
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 Este es un paso intermedio solicitado después de preparar MySQL. No implementa todavía los endpoints del paso 4 del plan original.
 
 ## 1. Qué es una interfaz

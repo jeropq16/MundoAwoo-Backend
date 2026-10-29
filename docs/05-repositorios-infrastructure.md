@@ -1,5 +1,7 @@
 # Implementaciones de repositorios en Infrastructure
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 ## 1. Qué implementamos
 
 Ahora las interfaces de Domain tienen clases que cumplen sus contratos mediante AwoorldDbContext:

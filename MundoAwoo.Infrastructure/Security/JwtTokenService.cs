@@ -19,8 +19,19 @@ public class JwtTokenService : IJwtTokenService
     }
 
     public AutenticacionRespuestaDto Crear(Guid usuarioId)
+        => CrearInterno(usuarioId, null);
+
+    public AutenticacionRespuestaDto Crear(Guid usuarioId, DateTimeOffset sesionExpiraEnUtc)
+        => CrearInterno(usuarioId, sesionExpiraEnUtc);
+
+    private AutenticacionRespuestaDto CrearInterno(Guid usuarioId, DateTimeOffset? sesionExpiraEnUtc)
     {
         DateTime ahora = DateTime.UtcNow;
+        DateTime expiracion = ahora.AddMinutes(_opciones.DuracionMinutos);
+        if (sesionExpiraEnUtc.HasValue && sesionExpiraEnUtc.Value.UtcDateTime < expiracion)
+            expiracion = sesionExpiraEnUtc.Value.UtcDateTime;
+        if (expiracion <= ahora)
+            throw new InvalidOperationException("La sesión ya expiró.");
         var claims = new[]
         {
             // El controlador de perfil leerá este identificador del dominio.
@@ -34,7 +45,7 @@ public class JwtTokenService : IJwtTokenService
         var clave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opciones.SigningKey));
         var firma = new SigningCredentials(clave, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(_opciones.Issuer, _opciones.Audience, claims,
-            notBefore: ahora, expires: ahora.AddMinutes(_opciones.DuracionMinutos), signingCredentials: firma);
+            notBefore: ahora, expires: expiracion, signingCredentials: firma);
 
         return new AutenticacionRespuestaDto
         {

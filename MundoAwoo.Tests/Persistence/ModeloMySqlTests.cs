@@ -23,14 +23,14 @@ public class ModeloMySqlTests
     }
 
     [Fact]
-    public void Modelo_UsaLasListasPrivadasSinCrearClavesForaneasOcultas()
+    public void Modelo_ConservaLasNavegacionesSinCrearClavesForaneasOcultas()
     {
         using var contexto = CrearContexto();
         var usuario = contexto.Model.FindEntityType(typeof(Usuario))!;
         var avatar = contexto.Model.FindEntityType(typeof(Avatar))!;
 
-        Assert.Equal("_itemsDesbloqueados", usuario.FindNavigation(nameof(Usuario.ItemsDesbloqueados))!.FieldInfo!.Name);
-        Assert.Equal("_itemsEquipados", avatar.FindNavigation(nameof(Avatar.ItemsEquipados))!.FieldInfo!.Name);
+        Assert.NotNull(usuario.FindNavigation(nameof(Usuario.ItemsDesbloqueados)));
+        Assert.NotNull(avatar.FindNavigation(nameof(Avatar.ItemsEquipados)));
 
         // Una FK oculta como UsuarioId1 indicaría una relación configurada dos veces por error.
         Assert.All(contexto.Model.GetEntityTypes().SelectMany(entidad => entidad.GetForeignKeys()),

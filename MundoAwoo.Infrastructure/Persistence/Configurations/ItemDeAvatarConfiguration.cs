@@ -14,6 +14,7 @@ public class ItemDeAvatarConfiguration : IEntityTypeConfiguration<ItemDeAvatar>
         builder.Property(item => item.Nombre).HasMaxLength(100).IsRequired();
         builder.Property(item => item.RecursoVisual).HasMaxLength(500).IsRequired();
         builder.Property(item => item.Ranura).HasConversion<int>();
+        builder.HasIndex(item => new { item.CategoriaId, item.Nombre }).IsUnique();
 
         // No borrar una categoría mientras tenga ítems asociados.
         builder.HasOne<Categoria>().WithMany()

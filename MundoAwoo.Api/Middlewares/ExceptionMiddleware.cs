@@ -1,4 +1,6 @@
 using MundoAwoo.Application.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace MundoAwoo.Api.Middlewares;
 
@@ -37,6 +39,12 @@ public class ExceptionMiddleware
                 titulo = "No se pudo iniciar sesión";
                 detalle = exception.Message;
             }
+            else if (exception is RefreshTokenInvalidoException)
+            {
+                estado = StatusCodes.Status401Unauthorized;
+                titulo = "Sesión inválida";
+                detalle = exception.Message;
+            }
             else if (exception is CorreoYaRegistradoException)
             {
                 estado = StatusCodes.Status409Conflict;
@@ -56,6 +64,48 @@ public class ExceptionMiddleware
                 titulo = "Perfil no encontrado";
                 detalle = "No existe un usuario asociado al identificador autenticado.";
             }
+            else if (exception is AvatarNoEncontradoException)
+            {
+                estado = StatusCodes.Status404NotFound;
+                titulo = "Avatar no encontrado";
+                detalle = exception.Message;
+            }
+            else if (exception is ItemDeAvatarNoEncontradoException)
+            {
+                estado = StatusCodes.Status404NotFound;
+                titulo = "Ítem no encontrado";
+                detalle = exception.Message;
+            }
+            else if (exception is CategoriaNoEncontradaException)
+            {
+                estado = StatusCodes.Status404NotFound;
+                titulo = "Categoría no encontrada";
+                detalle = exception.Message;
+            }
+            else if (exception is CatalogoDuplicadoException)
+            {
+                estado = StatusCodes.Status409Conflict;
+                titulo = "Contenido duplicado";
+                detalle = exception.Message;
+            }
+            else if (exception is DbUpdateException { InnerException: MySqlException { Number: 1062 } })
+            {
+                estado = StatusCodes.Status409Conflict;
+                titulo = "Registro duplicado";
+                detalle = "El registro ya existe. Consulta el estado actual antes de reintentar.";
+            }
+            else if (exception is ReglaAvatarException)
+            {
+                estado = StatusCodes.Status409Conflict;
+                titulo = "No se puede equipar el ítem";
+                detalle = exception.Message;
+            }
+            else if (exception is AccesoAdministradorDenegadoException)
+            {
+                estado = StatusCodes.Status403Forbidden;
+                titulo = "Acceso denegado";
+                detalle = exception.Message;
+            }
             else if (exception is ArgumentException)
             {
                 // Las validaciones actuales del perfil lanzan ArgumentException.
@@ -74,7 +124,8 @@ public class ExceptionMiddleware
 
             context.Response.Clear();
             context.Response.Headers.CacheControl = "no-store";
-            if (estado == StatusCodes.Status401Unauthorized)
+            if (estado == StatusCodes.Status401Unauthorized &&
+                exception is not (CredencialesInvalidasException or RefreshTokenInvalidoException))
                 context.Response.Headers.WWWAuthenticate = "Bearer";
             await Results.Problem(statusCode: estado, title: titulo, detail: detalle,
                 extensions: new Dictionary<string, object?> { ["traceId"] = context.TraceIdentifier })

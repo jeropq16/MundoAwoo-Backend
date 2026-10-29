@@ -19,6 +19,9 @@ public class AutenticacionController : ControllerBase
     }
 
     [HttpPost("registro")]
+    [ProducesResponseType(typeof(AutenticacionRespuestaDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<AutenticacionRespuestaDto>> Registrar(
         [FromBody] RegistroDto datos, CancellationToken cancellationToken)
     {
@@ -28,10 +31,32 @@ public class AutenticacionController : ControllerBase
     }
 
     [HttpPost("login")]
+    [ProducesResponseType(typeof(AutenticacionRespuestaDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AutenticacionRespuestaDto>> Login(
         [FromBody] LoginDto datos, CancellationToken cancellationToken)
     {
         AutenticacionRespuestaDto respuesta = await _autenticacion.LoginAsync(datos, cancellationToken);
         return Ok(respuesta);
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(AutenticacionRespuestaDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AutenticacionRespuestaDto>> Refrescar(
+        [FromBody] RefreshTokenDto datos, CancellationToken cancellationToken)
+    {
+        return Ok(await _autenticacion.RefrescarAsync(datos, cancellationToken));
+    }
+
+    [HttpPost("cerrar-sesion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CerrarSesion(
+        [FromBody] RefreshTokenDto datos, CancellationToken cancellationToken)
+    {
+        await _autenticacion.CerrarSesionAsync(datos, cancellationToken);
+        return NoContent();
     }
 }

@@ -1,5 +1,7 @@
 # Application: consultar y actualizar el perfil
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 ## 1. Qué responsabilidad tiene este servicio
 
 PerfilService coordina dos casos de uso: consultar el perfil de un usuario y actualizar su nombre visible y biografía. Application usa los contratos del repositorio y de la unidad de trabajo; no conoce DbContext, SQL ni MySQL.

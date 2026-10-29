@@ -1,15 +1,15 @@
+using static MundoAwoo.Tests.TestData;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MundoAwoo.Application.DTOs.Autenticacion;
 using MundoAwoo.Application.DTOs.Perfiles;
 using MundoAwoo.Domain.Entities;
-using MundoAwoo.Infrastructure.Identity;
+using MundoAwoo.Application.Security;
 using MundoAwoo.Infrastructure.Persistence;
 
 namespace MundoAwoo.Tests.Api;
@@ -43,15 +43,13 @@ public class AutenticacionControllerTests
 
         using var scope = api.Services.CreateScope();
         var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
-        var cuenta = await contexto.Users.SingleAsync();
-        Assert.Equal(autenticacion.UsuarioId, cuenta.UsuarioId);
-        Assert.NotEqual(cuenta.Id, cuenta.UsuarioId);
-        Assert.Equal("FAN@EXAMPLE.COM", cuenta.NormalizedEmail);
+        var cuenta = await contexto.Usuarios.SingleAsync(u => u.Id == autenticacion.UsuarioId);
+        Assert.Equal(Correo, cuenta.Correo);
         Assert.NotEqual(Contrasena, cuenta.PasswordHash);
-        var gestor = scope.ServiceProvider.GetRequiredService<UserManager<UsuarioIdentity>>();
-        Assert.True(await gestor.CheckPasswordAsync(cuenta, Contrasena));
-        Assert.Equal(1, await contexto.PerfilesUsuario.CountAsync(p => p.UsuarioId == cuenta.UsuarioId));
-        var avatar = await contexto.Avatares.Include(a => a.ItemsEquipados).SingleAsync(a => a.UsuarioId == cuenta.UsuarioId);
+        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        Assert.True(hasher.Verify(Contrasena, cuenta.PasswordHash!));
+        Assert.Equal(1, await contexto.PerfilesUsuario.CountAsync(p => p.UsuarioId == cuenta.Id));
+        var avatar = await contexto.Avatares.Include(a => a.ItemsEquipados).SingleAsync(a => a.UsuarioId == cuenta.Id);
         Assert.Empty(avatar.ItemsEquipados);
 
         cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", autenticacion.Token);
@@ -100,7 +98,7 @@ public class AutenticacionControllerTests
         Assert.Equal(HttpStatusCode.Conflict, respuesta.StatusCode);
         using var scope = api.Services.CreateScope();
         var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
-        Assert.Equal(1, await contexto.Users.CountAsync());
+        Assert.Equal(1, await contexto.Usuarios.CountAsync(u => u.Correo != null));
         Assert.Equal(3, await contexto.Usuarios.CountAsync()); // Dos usuarios preparados + el registrado.
         Assert.Equal(3, await contexto.PerfilesUsuario.CountAsync());
         Assert.Equal(1, await contexto.Avatares.CountAsync());
@@ -141,7 +139,7 @@ public class AutenticacionControllerTests
     }
 
     [Fact]
-    public async Task Registro_FalloDespuesDeGuardarIdentity_RevierteCuentaPerfilYAvatar()
+    public async Task Registro_FalloDelToken_NoGuardaCuentaPerfilNiAvatar()
     {
         using var api = new PerfilApiFactory(simularFalloToken: true);
         await api.PrepararDatosAsync();
@@ -193,13 +191,15 @@ public class AutenticacionControllerTests
             new LoginDto { Correo = Correo, Contrasena = Contrasena });
         Assert.Equal(HttpStatusCode.Unauthorized, bloqueado.StatusCode);
 
-        // Adelantamos el fin del bloqueo en la base de prueba; no esperamos cinco minutos.
+        // Un desbloqueo administrativo permite comprobar el siguiente login sin esperar cinco minutos.
         using (var scope = api.Services.CreateScope())
         {
-            var gestor = scope.ServiceProvider.GetRequiredService<UserManager<UsuarioIdentity>>();
-            var cuenta = (await gestor.FindByEmailAsync(Correo))!;
-            Assert.True(await gestor.IsLockedOutAsync(cuenta));
-            Assert.True((await gestor.SetLockoutEndDateAsync(cuenta, DateTimeOffset.UtcNow.AddMinutes(-1))).Succeeded);
+            var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
+            var cuenta = await contexto.Usuarios.SingleAsync(u => u.Correo == Correo);
+            Assert.True(cuenta.BloqueadoHastaUtc > DateTime.UtcNow);
+            cuenta.IntentosFallidos = 0;
+            cuenta.BloqueadoHastaUtc = null;
+            await contexto.SaveChangesAsync();
         }
 
         using var permitido = await cliente.PostAsJsonAsync("/api/autenticacion/login",
@@ -208,7 +208,7 @@ public class AutenticacionControllerTests
     }
 
     [Fact]
-    public async Task BaseDeDatos_ImpideCorreosNormalizadosDuplicadosAunqueSeOmitaUserManager()
+    public async Task BaseDeDatos_ImpideCorreosDuplicadosAunqueSeOmitaElServicio()
     {
         using var api = new PerfilApiFactory();
         await api.PrepararDatosAsync();
@@ -216,14 +216,8 @@ public class AutenticacionControllerTests
         await RegistrarAsync(cliente);
         using var scope = api.Services.CreateScope();
         var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
-        var otro = new Usuario("Otro");
+        var otro = CrearUsuario("Otro", "FAN@EXAMPLE.COM", "hash-de-prueba");
         contexto.Usuarios.Add(otro);
-        contexto.Users.Add(new UsuarioIdentity
-        {
-            Id = Guid.NewGuid(), UsuarioId = otro.Id,
-            UserName = "otro", NormalizedUserName = "OTRO",
-            Email = Correo, NormalizedEmail = "FAN@EXAMPLE.COM"
-        });
 
         await Assert.ThrowsAsync<DbUpdateException>(() => contexto.SaveChangesAsync());
     }
@@ -244,7 +238,7 @@ public class AutenticacionControllerTests
     {
         using var scope = api.Services.CreateScope();
         var contexto = scope.ServiceProvider.GetRequiredService<AwoorldDbContext>();
-        Assert.Equal(0, await contexto.Users.CountAsync());
+        Assert.Equal(0, await contexto.Usuarios.CountAsync(u => u.Correo != null));
         Assert.Equal(2, await contexto.Usuarios.CountAsync());
         Assert.Equal(2, await contexto.PerfilesUsuario.CountAsync());
         Assert.Equal(0, await contexto.Avatares.CountAsync());

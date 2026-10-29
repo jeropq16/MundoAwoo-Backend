@@ -1,3 +1,4 @@
+using static MundoAwoo.Tests.TestData;
 using Microsoft.EntityFrameworkCore;
 using MundoAwoo.Domain.Entities;
 using MundoAwoo.Domain.Enums;
@@ -18,8 +19,8 @@ public class RepositoriosTests
         var usuarios = new UsuarioRepository(contexto);
         var avatares = new AvatarRepository(contexto);
         var unidad = new UnitOfWork(contexto);
-        var usuario = new Usuario("Fan");
-        var avatar = new Avatar(usuario.Id);
+        var usuario = CrearUsuario("Fan");
+        var avatar = CrearAvatar(usuario.Id);
 
         usuarios.Agregar(usuario);
         avatares.Agregar(avatar);
@@ -51,18 +52,18 @@ public class RepositoriosTests
         var avatares = new AvatarRepository(contexto);
         var catalogo = new ItemDeAvatarRepository(contexto);
         var unidad = new UnitOfWork(contexto);
-        var categoria = new Categoria("Ropa", TipoCategoria.Ropa);
-        var camiseta = new ItemDeAvatar("Camiseta", categoria, RanuraAvatar.Torso, "camiseta.png");
+        var categoria = CrearCategoria("Ropa", TipoCategoria.Ropa);
+        var camiseta = CrearItem("Camiseta", categoria, RanuraAvatar.Torso, "camiseta.png");
         // Preparación del catálogo: todavía no existe un caso de uso administrativo.
         contexto.Categorias.Add(categoria);
         contexto.ItemsDeAvatar.Add(camiseta);
-        var usuario = new Usuario("Fan");
-        usuario.DesbloquearItem(camiseta);
+        var usuario = CrearUsuario("Fan");
+        DesbloquearItem(usuario, camiseta);
         usuarios.Agregar(usuario);
-        avatares.Agregar(new Avatar(usuario.Id));
-        var otroUsuario = new Usuario("Otro fan");
+        avatares.Agregar(CrearAvatar(usuario.Id));
+        var otroUsuario = CrearUsuario("Otro fan");
         usuarios.Agregar(otroUsuario);
-        avatares.Agregar(new Avatar(otroUsuario.Id));
+        avatares.Agregar(CrearAvatar(otroUsuario.Id));
         await unidad.GuardarCambiosAsync();
         contexto.ChangeTracker.Clear();
 
@@ -74,12 +75,12 @@ public class RepositoriosTests
         Assert.NotNull(recuperado);
         Assert.NotNull(avatar);
         Assert.NotNull(item);
-        Assert.True(recuperado.TieneItemDesbloqueado(item.Id));
+        Assert.True(TieneItemDesbloqueado(recuperado, item.Id));
         Assert.Equal(usuario.Id, avatar.UsuarioId);
 
-        recuperado.ActualizarPerfil("Nuevo nombre", "Biografía actualizada");
-        avatar.Equipar(item, recuperado);
-        avatar.CambiarColorFondo(new ColorHex("#AABBCC"));
+        ActualizarPerfil(recuperado, "Nuevo nombre", "Biografía actualizada");
+        Equipar(avatar, item, recuperado);
+        CambiarColorFondo(avatar, new ColorHex("#AABBCC"));
         await unidad.GuardarCambiosAsync();
         contexto.ChangeTracker.Clear();
 
@@ -94,7 +95,7 @@ public class RepositoriosTests
         Assert.Equal(1, await contexto.ItemsDeAvatar.CountAsync());
 
         // Quitar de la lista privada debe eliminar el equipamiento persistido, no el desbloqueo.
-        avatarGuardado.Desequipar(item.Id);
+        Desequipar(avatarGuardado, item.Id);
         await unidad.GuardarCambiosAsync();
         contexto.ChangeTracker.Clear();
         var sinEquipamiento = await avatares.ObtenerPorUsuarioIdAsync(usuario.Id);
@@ -110,11 +111,11 @@ public class RepositoriosTests
     public async Task Catalogo_FiltraOrdenaYNoDejaEntidadesEnSeguimiento()
     {
         await using var contexto = await CrearContextoAsync();
-        var ropa = new Categoria("Ropa", TipoCategoria.Ropa);
-        var accesorios = new Categoria("Accesorios", TipoCategoria.Accesorio);
-        var camiseta = new ItemDeAvatar("Camiseta", ropa, RanuraAvatar.Torso, "camiseta.png");
-        var buzo = new ItemDeAvatar("Buzo", ropa, RanuraAvatar.Torso, "buzo.png");
-        var lentes = new ItemDeAvatar("Lentes", accesorios, RanuraAvatar.Ojos, "lentes.png");
+        var ropa = CrearCategoria("Ropa", TipoCategoria.Ropa);
+        var accesorios = CrearCategoria("Accesorios", TipoCategoria.Accesorio);
+        var camiseta = CrearItem("Camiseta", ropa, RanuraAvatar.Torso, "camiseta.png");
+        var buzo = CrearItem("Buzo", ropa, RanuraAvatar.Torso, "buzo.png");
+        var lentes = CrearItem("Lentes", accesorios, RanuraAvatar.Ojos, "lentes.png");
         contexto.Categorias.AddRange(ropa, accesorios);
         contexto.ItemsDeAvatar.AddRange(camiseta, buzo, lentes);
         await contexto.SaveChangesAsync();
@@ -150,12 +151,12 @@ public class RepositoriosTests
     public async Task Guardar_ConUnaReferenciaInvalida_NoDejaUnUsuarioParcialmenteCreado()
     {
         await using var contexto = await CrearContextoAsync();
-        var usuario = new Usuario("Fan");
-        var itemNoGuardado = new ItemDeAvatar("Camiseta", new Categoria("Ropa", TipoCategoria.Ropa),
+        var usuario = CrearUsuario("Fan");
+        var itemNoGuardado = CrearItem("Camiseta", CrearCategoria("Ropa", TipoCategoria.Ropa),
             RanuraAvatar.Torso, "camiseta.png");
-        usuario.DesbloquearItem(itemNoGuardado);
+        DesbloquearItem(usuario, itemNoGuardado);
         new UsuarioRepository(contexto).Agregar(usuario);
-        new AvatarRepository(contexto).Agregar(new Avatar(usuario.Id));
+        new AvatarRepository(contexto).Agregar(CrearAvatar(usuario.Id));
 
         await Assert.ThrowsAsync<DbUpdateException>(() => new UnitOfWork(contexto).GuardarCambiosAsync());
         contexto.ChangeTracker.Clear();
@@ -182,7 +183,7 @@ public class RepositoriosTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => catalogo.ObtenerPorCategoriaAsync(id, cancelacion.Token));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => catalogo.ObtenerCategoriasAsync(cancelacion.Token));
 
-        new UsuarioRepository(contexto).Agregar(new Usuario("Fan"));
+        new UsuarioRepository(contexto).Agregar(CrearUsuario("Fan"));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             new UnitOfWork(contexto).GuardarCambiosAsync(cancelacion.Token));
         Assert.Equal(0, await contexto.Usuarios.CountAsync());

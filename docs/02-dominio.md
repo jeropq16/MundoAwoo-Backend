@@ -1,5 +1,7 @@
 # Paso 2: entidades y reglas del dominio
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 ## Cómo leer el código
 
 Empieza por Enums, Categoria e ItemDeAvatar; continúa con PerfilUsuario y Usuario; termina con Avatar y ColorHex. Las entidades viven en MundoAwoo.Domain, sin dependencias de EF Core, Identity, HTTP o React.

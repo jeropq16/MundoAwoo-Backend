@@ -26,6 +26,16 @@ public class UsuarioRepository : IUsuarioRepository
             .SingleOrDefaultAsync(usuario => usuario.Id == usuarioId, cancellationToken);
     }
 
+    public async Task<Usuario?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken = default)
+    {
+        return await _contexto.Usuarios.AsTracking()
+            .SingleOrDefaultAsync(usuario => usuario.Correo == correo, cancellationToken);
+    }
+
+    public Task<bool> EsAdministradorAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+        => _contexto.Usuarios.AsNoTracking()
+            .AnyAsync(usuario => usuario.Id == usuarioId && usuario.EsAdministrador, cancellationToken);
+
     public void Agregar(Usuario usuario)
     {
         ArgumentNullException.ThrowIfNull(usuario);

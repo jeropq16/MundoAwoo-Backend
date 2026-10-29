@@ -10,8 +10,14 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
     {
         builder.ToTable("Usuarios");
         builder.HasKey(usuario => usuario.Id);
-        // El dominio genera el Guid. MySQL no debe generar un segundo identificador.
+        // Application genera el Guid. MySQL no debe generar otro identificador.
         builder.Property(usuario => usuario.Id).ValueGeneratedNever();
+        builder.Property(usuario => usuario.Correo).HasMaxLength(256);
+        builder.HasIndex(usuario => usuario.Correo).IsUnique();
+        builder.Property(usuario => usuario.PasswordHash).HasMaxLength(255);
+        builder.Property(usuario => usuario.IntentosFallidos).HasDefaultValue(0);
+        builder.Property(usuario => usuario.EsAdministrador).HasDefaultValue(false);
+        builder.Property(usuario => usuario.BloqueadoHastaUtc).HasColumnType("datetime(6)");
 
         // MySQL datetime no guarda el offset: convertimos explícitamente a UTC al escribir y leer.
         builder.Property(usuario => usuario.FechaRegistro)
@@ -24,13 +30,9 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
             .HasForeignKey<PerfilUsuario>(perfil => perfil.UsuarioId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // EF escribe en la lista privada, no en la vista de solo lectura del dominio.
         builder.HasMany(usuario => usuario.ItemsDesbloqueados)
             .WithOne()
             .HasForeignKey(item => item.UsuarioId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.Navigation(usuario => usuario.ItemsDesbloqueados)
-            .HasField("_itemsDesbloqueados")
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

@@ -1,5 +1,7 @@
 # Awoorld: paso 1, arquitectura del backend
 
+> **Nota histórica:** este documento describe una etapa anterior. La estructura y autenticación vigentes están en [README](../README.md) y [registro/login actual](08-registro-login.md).
+
 ## Contexto y forma de trabajo
 
 - Producto: Awoorld, sitio para el fandom de un artista, con registro, login, perfil y avatar personalizable.
