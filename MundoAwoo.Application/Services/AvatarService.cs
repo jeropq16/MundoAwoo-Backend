@@ -40,6 +40,40 @@ public class AvatarService : IAvatarService
         avatar.ChaquetaQueen = chaquetaQueen;
     }
 
+    public void CambiarApariencia3D(Avatar avatar, string personaje, string pelo, string barba,
+        string tatuajes, ColorHex colorCabello)
+    {
+        ArgumentNullException.ThrowIfNull(avatar);
+        ArgumentNullException.ThrowIfNull(colorCabello);
+        // Validate every option before changing either character's saved appearance.
+        string objetivo = ValidarOpcion(personaje, "personaje", "ghetto", "queen");
+        string corte = ValidarOpcion(pelo, "pelo", "original", "rapado", "fade", "trenzas", "cresta");
+        string vello = ValidarOpcion(barba, "barba", "original", "afeitado", "candado", "completa", "bigote");
+        string tinta = ValidarOpcion(tatuajes, "tatuajes", "ninguno", "geometrico", "estrellas", "blackwork");
+        if (objetivo == "ghetto")
+        {
+            avatar.PeloGhetto = corte;
+            avatar.BarbaGhetto = vello;
+            avatar.TatuajesGhetto = tinta;
+            avatar.ColorCabelloGhetto = colorCabello.Valor;
+        }
+        else
+        {
+            avatar.PeloQueen = corte;
+            avatar.BarbaQueen = vello;
+            avatar.TatuajesQueen = tinta;
+            avatar.ColorCabelloQueen = colorCabello.Valor;
+        }
+    }
+
+    private static string ValidarOpcion(string? opcion, string nombre, params string[] permitidas)
+    {
+        string valor = opcion?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (!permitidas.Contains(valor))
+            throw new ArgumentException($"La opción de {nombre} no es válida.", nombre);
+        return valor;
+    }
+
     public void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario)
     {
         ArgumentNullException.ThrowIfNull(avatar);

@@ -52,6 +52,18 @@ public class AvatarController : ControllerBase
         return Ok(await _avatares.CambiarEstilo3DAsync(usuarioId, datos, cancellationToken));
     }
 
+    [HttpPut("apariencia3d")]
+    [ProducesResponseType(typeof(AvatarDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AvatarDto>> CambiarApariencia3D(
+        [FromBody] CambiarApariencia3DDto datos, CancellationToken cancellationToken)
+    {
+        if (!UsuarioAutenticado.IntentarObtenerId(User, out Guid usuarioId)) return Forbid();
+        return Ok(await _avatares.CambiarApariencia3DAsync(usuarioId, datos, cancellationToken));
+    }
+
     [HttpPost("items/{itemId}/equipar")]
     [ProducesResponseType(typeof(AvatarDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

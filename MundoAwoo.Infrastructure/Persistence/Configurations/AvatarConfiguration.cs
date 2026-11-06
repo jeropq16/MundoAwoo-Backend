@@ -18,6 +18,15 @@ public class AvatarConfiguration : IEntityTypeConfiguration<Avatar>
         builder.Property(avatar => avatar.ChaquetaGhetto).HasDefaultValue(false);
         builder.Property(avatar => avatar.ChaquetaQueen).HasDefaultValue(false);
 
+        builder.Property(a => a.PeloGhetto).HasMaxLength(16).HasDefaultValue("original").IsRequired();
+        builder.Property(a => a.BarbaGhetto).HasMaxLength(16).HasDefaultValue("original").IsRequired();
+        builder.Property(a => a.TatuajesGhetto).HasMaxLength(16).HasDefaultValue("ninguno").IsRequired();
+        builder.Property(a => a.ColorCabelloGhetto).HasColumnType("char(7)").HasDefaultValue("#201813").IsRequired();
+        builder.Property(a => a.PeloQueen).HasMaxLength(16).HasDefaultValue("original").IsRequired();
+        builder.Property(a => a.BarbaQueen).HasMaxLength(16).HasDefaultValue("original").IsRequired();
+        builder.Property(a => a.TatuajesQueen).HasMaxLength(16).HasDefaultValue("ninguno").IsRequired();
+        builder.Property(a => a.ColorCabelloQueen).HasColumnType("char(7)").HasDefaultValue("#29161C").IsRequired();
+
         // El objeto ColorHex se guarda en una columna; no necesita una tabla propia.
         builder.Property(avatar => avatar.ColorFondo)
             .HasConversion(color => color.Valor, valor => new ColorHex(valor))

@@ -28,6 +28,20 @@ namespace MundoAwoo.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("BarbaGhetto")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("original");
+
+                    b.Property<string>("BarbaQueen")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("original");
+
                     b.Property<bool>("ChaquetaGhetto")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
@@ -38,9 +52,35 @@ namespace MundoAwoo.Infrastructure.Persistence.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("ColorCabelloGhetto")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(7)")
+                        .HasDefaultValue("#201813");
+
+                    b.Property<string>("ColorCabelloQueen")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(7)")
+                        .HasDefaultValue("#29161C");
+
                     b.Property<string>("ColorFondo")
                         .IsRequired()
                         .HasColumnType("char(7)");
+
+                    b.Property<string>("PeloGhetto")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("original");
+
+                    b.Property<string>("PeloQueen")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("original");
 
                     b.Property<string>("Personaje3D")
                         .IsRequired()
@@ -48,6 +88,20 @@ namespace MundoAwoo.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("varchar(16)")
                         .HasDefaultValue("ghetto");
+
+                    b.Property<string>("TatuajesGhetto")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("ninguno");
+
+                    b.Property<string>("TatuajesQueen")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("ninguno");
 
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("char(36)");

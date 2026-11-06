@@ -85,3 +85,15 @@ Las migraciones existentes se aplican en orden. `AgregarIdentity` es una migraci
 ```
 
 La bomber incluida es una opción base de cada personaje. Los ítems de catálogo conservan sus requisitos de desbloqueo, ranuras y permisos; no se conceden al cambiar el estilo. La API valida los dos identificadores de personaje. La migración aditiva `EstudioPrincipal3D` asigna `ghetto` y ambas bombers desactivadas a los avatares existentes, sin alterar su inventario ni su color. Aplicarla con el comando habitual `dotnet ef database update --project MundoAwoo.Infrastructure --startup-project MundoAwoo.Api`.
+
+## Apariencia personal por personaje
+
+`GET /api/avatar` incluye `aparienciaGhetto` y `aparienciaQueen`, cada una con `pelo`, `barba`, `tatuajes` y `colorCabello`. `PUT /api/avatar/apariencia3d` actualiza exclusivamente la apariencia del personaje indicado y de la cuenta autenticada:
+
+```json
+{ "personaje3D": "ghetto", "pelo": "trenzas", "barba": "candado", "tatuajes": "blackwork", "colorCabello": "#201813" }
+```
+
+Valores admitidos: pelo `original`, `rapado`, `fade`, `trenzas`, `cresta`; barba `original`, `afeitado`, `candado`, `completa`, `bigote`; tatuajes `ninguno`, `geometrico`, `estrellas`, `blackwork`. El color usa `#RRGGBB`, con la misma normalización de `ColorHex`. Todos los campos se validan antes de modificar la apariencia. Cambiar personaje o chaquetas mediante `estilo3d` no borra estas preferencias.
+
+La migración aditiva `AparienciaPersonajes3D` conserva el aspecto clásico para los avatares existentes. Se aplica con `dotnet ef database update --project MundoAwoo.Infrastructure --startup-project MundoAwoo.Api`.
