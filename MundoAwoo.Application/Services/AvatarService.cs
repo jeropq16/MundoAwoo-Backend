@@ -29,6 +29,17 @@ public class AvatarService : IAvatarService
         avatar.ColorFondo = color;
     }
 
+    public void CambiarEstilo3D(Avatar avatar, string personaje, bool chaquetaGhetto, bool chaquetaQueen)
+    {
+        ArgumentNullException.ThrowIfNull(avatar);
+        string valor = personaje?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (valor is not ("ghetto" or "queen"))
+            throw new ArgumentException("El personaje 3D debe ser ghetto o queen.", nameof(personaje));
+        avatar.Personaje3D = valor;
+        avatar.ChaquetaGhetto = chaquetaGhetto;
+        avatar.ChaquetaQueen = chaquetaQueen;
+    }
+
     public void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario)
     {
         ArgumentNullException.ThrowIfNull(avatar);

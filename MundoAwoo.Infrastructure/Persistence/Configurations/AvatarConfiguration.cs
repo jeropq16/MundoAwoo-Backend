@@ -13,6 +13,11 @@ public class AvatarConfiguration : IEntityTypeConfiguration<Avatar>
         builder.HasKey(avatar => avatar.Id);
         builder.Property(avatar => avatar.Id).ValueGeneratedNever();
 
+        builder.Property(avatar => avatar.Personaje3D)
+            .HasMaxLength(16).HasDefaultValue("ghetto").IsRequired();
+        builder.Property(avatar => avatar.ChaquetaGhetto).HasDefaultValue(false);
+        builder.Property(avatar => avatar.ChaquetaQueen).HasDefaultValue(false);
+
         // El objeto ColorHex se guarda en una columna; no necesita una tabla propia.
         builder.Property(avatar => avatar.ColorFondo)
             .HasConversion(color => color.Valor, valor => new ColorHex(valor))

@@ -75,3 +75,13 @@ POST /api/inventario/items/GUID-DEL-ITEM/desbloquear
 Los tipos admitidos son `Ropa`, `Accesorio`, `Baile` y `Gesto`. Las ranuras admitidas son `Torso`, `Piernas`, `Pies`, `Cabeza`, `Ojos`, `Cuello` y `Animacion`; el servicio comprueba su compatibilidad con el tipo de categoría. Crear devuelve `201`; conceder devuelve `200` con el ítem del inventario y se puede repetir sin duplicarlo. Un usuario normal recibe `403`, los datos inválidos `400`, una categoría/usuario/ítem inexistente `404` y un nombre duplicado `409`.
 
 Las migraciones existentes se aplican en orden. `AgregarIdentity` es una migración histórica; `AutenticacionSinIdentity` retira esas tablas y deja el esquema actual. No edites migraciones ya aplicadas. Ver [autenticación actual](docs/08-registro-login.md) y [guía de MySQL](docs/03-mysql.md). Los demás documentos en `docs/` cuentan etapas anteriores y pueden contener ejemplos históricos.
+
+## Estudio 3D principal
+
+`GET /api/avatar` devuelve `personaje3D` (`ghetto` o `queen`), `chaquetaGhetto` y `chaquetaQueen`, además del color y los ítems existentes. `PUT /api/avatar/estilo3d` requiere JWT y recibe los tres campos para guardar la selección propia:
+
+```json
+{ "personaje3D": "queen", "chaquetaGhetto": true, "chaquetaQueen": false }
+```
+
+La bomber incluida es una opción base de cada personaje. Los ítems de catálogo conservan sus requisitos de desbloqueo, ranuras y permisos; no se conceden al cambiar el estilo. La API valida los dos identificadores de personaje. La migración aditiva `EstudioPrincipal3D` asigna `ghetto` y ambas bombers desactivadas a los avatares existentes, sin alterar su inventario ni su color. Aplicarla con el comando habitual `dotnet ef database update --project MundoAwoo.Infrastructure --startup-project MundoAwoo.Api`.

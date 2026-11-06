@@ -28,9 +28,26 @@ namespace MundoAwoo.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)");
 
+                    b.Property<bool>("ChaquetaGhetto")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("ChaquetaQueen")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("ColorFondo")
                         .IsRequired()
                         .HasColumnType("char(7)");
+
+                    b.Property<string>("Personaje3D")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("ghetto");
 
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("char(36)");

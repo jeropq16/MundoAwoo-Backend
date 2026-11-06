@@ -44,6 +44,16 @@ public class AvatarAplicacionService : IAvatarAplicacionService
         return await CrearDtoAsync(avatar, cancellationToken);
     }
 
+    public async Task<AvatarDto> CambiarEstilo3DAsync(Guid usuarioId, CambiarEstilo3DDto datos,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+        Avatar avatar = await BuscarAvatarAsync(usuarioId, cancellationToken);
+        _avatarService.CambiarEstilo3D(avatar, datos.Personaje3D, datos.ChaquetaGhetto, datos.ChaquetaQueen);
+        await _unidadDeTrabajo.GuardarCambiosAsync(cancellationToken);
+        return await CrearDtoAsync(avatar, cancellationToken);
+    }
+
     public async Task<AvatarDto> EquiparAsync(Guid usuarioId, Guid itemId,
         CancellationToken cancellationToken = default)
     {
@@ -103,6 +113,9 @@ public class AvatarAplicacionService : IAvatarAplicacionService
             Id = avatar.Id,
             UsuarioId = avatar.UsuarioId,
             ColorFondo = avatar.ColorFondo.Valor,
+            Personaje3D = avatar.Personaje3D,
+            ChaquetaGhetto = avatar.ChaquetaGhetto,
+            ChaquetaQueen = avatar.ChaquetaQueen,
             ItemsEquipados = equipados.Select(equipado =>
             {
                 ItemDeAvatar item = porId[equipado.ItemDeAvatarId];
