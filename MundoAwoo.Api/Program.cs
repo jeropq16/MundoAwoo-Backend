@@ -22,6 +22,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow;
 });
 builder.Services.AddProblemDetails();
+builder.Services.AddSingleton<EncuentroService>();
+builder.Services.AddSignalR(options => { options.MaximumReceiveMessageSize = 4096; });
 AutenticacionJwt.Registrar(builder.Services, builder.Configuration);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -96,6 +98,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<MundoAwoo.Api.Hubs.EncuentroHub>("/api/encuentros", options =>
+{
+    options.CloseOnAuthenticationExpiration = true;
+    options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
+});
 
 app.Run();
 
