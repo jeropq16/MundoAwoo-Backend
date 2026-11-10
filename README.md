@@ -1,27 +1,12 @@
-# MundoAwoo Backend
+# Mundo Awoo · Backend
 
-Backend de MundoAwoo construido con **ASP.NET Core 9** y una arquitectura basada en **Clean Architecture + DDD**.
+Este repositorio contiene el backend de Mundo Awoo.
+La rama `main` se conserva únicamente con este README.
 
-## Ramas
+## Ramas de desarrollo
 
-- `main`: rama estable del proyecto.
-- `develop`: rama de integración con la estructura base y el desarrollo activo.
+- [`develop`](https://github.com/jeropq16/MundoAwoo-Backend/tree/develop): proyecto completo con todos los cambios integrados, incluida la reconexión de las salas.
+- [`MomiaDev`](https://github.com/jeropq16/MundoAwoo-Backend/tree/MomiaDev): rama de trabajo creada desde `develop`.
+- [`Yeremaia`](https://github.com/jeropq16/MundoAwoo-Backend/tree/Yeremaia): rama de trabajo creada desde `develop`.
 
-## Arquitectura
-
-La solución está dividida en cuatro capas principales:
-
-- `MundoAwoo.Domain`: entidades, enumeraciones, interfaces y reglas del dominio.
-- `MundoAwoo.Application`: casos de uso, DTOs, validaciones y contratos de aplicación.
-- `MundoAwoo.Infrastructure`: persistencia, repositorios e integraciones externas.
-- `MundoAwoo.Api`: API HTTP, configuración, middlewares y composición de la aplicación.
-
-También existe `MundoAwoo.Tests` para las pruebas automatizadas.
-
-## Requisitos
-
-- .NET SDK 9
-
-## Desarrollo
-
-La estructura inicial se encuentra en la rama `develop`.
+Para consultar el código, las instrucciones de ejecución y las pruebas, entra a `develop`.
