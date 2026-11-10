@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using MundoAwoo.Api.Security;
 using MundoAwoo.Application.DTOs.Encuentros;
 using MundoAwoo.Application.Interfaces;
+using MundoAwoo.Application.Exceptions;
 using MundoAwoo.Application.Services;
 
 namespace MundoAwoo.Api.Hubs;
@@ -10,10 +11,10 @@ namespace MundoAwoo.Api.Hubs;
 [Authorize(Policy = AutenticacionJwt.PoliticaPerfilPropio)]
 public class EncuentroHub(EncuentroService salas, IPerfilService perfiles, IAvatarAplicacionService avatares) : Hub
 {
-    public Task<SalaDto> CrearSala() => Entrar(null);
-    public Task<SalaDto> UnirseSala(string codigo) => Entrar(codigo ?? "");
+    public Task<EntradaSalaDto> CrearSala() => Entrar(null);
+    public Task<EntradaSalaDto> UnirseSala(string codigo) => Entrar(codigo ?? "");
 
-    private async Task<SalaDto> Entrar(string? codigo)
+    private async Task<EntradaSalaDto> Entrar(string? codigo)
     {
         if (!UsuarioAutenticado.IntentarObtenerId(Context.User!, out var usuarioId))
             throw new HubException("Inicia sesión de nuevo para entrar.");
@@ -26,12 +27,35 @@ public class EncuentroHub(EncuentroService salas, IPerfilService perfiles, IAvat
             await Groups.AddToGroupAsync(Context.ConnectionId, sala.Codigo, Context.ConnectionAborted);
             sala = salas.Consultar(Context.ConnectionId);
             await Publicar(sala);
-            return sala;
+            return new(sala, salas.ObtenerTokenReconexion(Context.ConnectionId));
         }
         catch
         {
             var salida = salas.Salir(Context.ConnectionId);
             if (salida is not null) await Publicar(salida);
+            throw;
+        }
+    }
+
+    public async Task<EntradaSalaDto> ReanudarSala(string codigo, string tokenReconexion)
+    {
+        if (!UsuarioAutenticado.IntentarObtenerId(Context.User!, out var usuarioId))
+            throw new HubException("Inicia sesión de nuevo para entrar.");
+        var retorno = Validar(() => salas.Reanudar(Context.ConnectionId, usuarioId, codigo, tokenReconexion));
+        try
+        {
+            if (retorno.ConexionAnterior is not null)
+                await Groups.RemoveFromGroupAsync(retorno.ConexionAnterior, retorno.Sala.Codigo);
+            await Groups.AddToGroupAsync(Context.ConnectionId, retorno.Sala.Codigo, Context.ConnectionAborted);
+            var sala = salas.Consultar(Context.ConnectionId);
+            await Publicar(sala);
+            return new(sala, salas.ObtenerTokenReconexion(Context.ConnectionId));
+        }
+        catch
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, retorno.Sala.Codigo);
+            var sala = salas.Desconectar(Context.ConnectionId);
+            if (sala is not null) await Publicar(sala);
             throw;
         }
     }
@@ -49,7 +73,7 @@ public class EncuentroHub(EncuentroService salas, IPerfilService perfiles, IAvat
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var sala = salas.Salir(Context.ConnectionId);
+        var sala = salas.Desconectar(Context.ConnectionId);
         if (sala is not null) await Publicar(sala);
         await base.OnDisconnectedAsync(exception);
     }
@@ -57,6 +81,7 @@ public class EncuentroHub(EncuentroService salas, IPerfilService perfiles, IAvat
     private static T Validar<T>(Func<T> accion)
     {
         try { return accion(); }
+        catch (ReconexionNoDisponibleException) { throw new HubException("REANUDACION_NO_DISPONIBLE"); }
         catch (ArgumentException error) { throw new HubException(error.Message); }
     }
 }

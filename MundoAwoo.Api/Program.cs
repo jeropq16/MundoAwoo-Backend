@@ -23,6 +23,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<EncuentroService>();
+builder.Services.AddHostedService<MundoAwoo.Api.Hubs.ReservasEncuentroWorker>();
 builder.Services.AddSignalR(options => { options.MaximumReceiveMessageSize = 4096; });
 AutenticacionJwt.Registrar(builder.Services, builder.Configuration);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
