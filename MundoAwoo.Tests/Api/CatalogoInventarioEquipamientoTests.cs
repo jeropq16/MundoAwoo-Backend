@@ -126,6 +126,15 @@ public class CatalogoInventarioEquipamientoTests
         using var ranuraOcupada = await cliente.PostAsync($"/api/avatar/items/{otroId}/equipar", null);
         Assert.Equal(HttpStatusCode.Conflict, ranuraOcupada.StatusCode);
 
+        using var reemplazo = await cliente.PutAsync($"/api/avatar/items/{otroId}/equipar", null);
+        Assert.Equal(HttpStatusCode.OK, reemplazo.StatusCode);
+        Assert.Equal(otroId, Assert.Single((await reemplazo.Content.ReadFromJsonAsync<AvatarDto>())!.ItemsEquipados).ItemDeAvatarId);
+        Assert.Equal(otroId, Assert.Single((await cliente.GetFromJsonAsync<AvatarDto>("/api/avatar"))!.ItemsEquipados).ItemDeAvatarId);
+        using var reemplazoBloqueado = await cliente.PutAsync($"/api/avatar/items/{bloqueadoId}/equipar", null);
+        Assert.Equal(HttpStatusCode.Conflict, reemplazoBloqueado.StatusCode);
+        Assert.Equal(otroId, Assert.Single((await cliente.GetFromJsonAsync<AvatarDto>("/api/avatar"))!.ItemsEquipados).ItemDeAvatarId);
+        using var restaurar = await cliente.PutAsync($"/api/avatar/items/{itemId}/equipar", null);
+        Assert.Equal(HttpStatusCode.OK, restaurar.StatusCode);
         using var quitar = await cliente.DeleteAsync($"/api/avatar/items/{itemId}/desequipar");
         Assert.Equal(HttpStatusCode.NoContent, quitar.StatusCode);
         using var quitarOtraVez = await cliente.DeleteAsync($"/api/avatar/items/{itemId}/desequipar");
@@ -142,3 +151,4 @@ public class CatalogoInventarioEquipamientoTests
         Assert.Equal(HttpStatusCode.Conflict, ajeno.StatusCode);
     }
 }
+

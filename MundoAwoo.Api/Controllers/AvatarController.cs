@@ -77,6 +77,12 @@ public class AvatarController : ControllerBase
         return Ok(await _avatares.EquiparAsync(usuarioId, itemId, cancellationToken));
     }
 
+    [HttpPut("items/{itemId}/equipar")]
+    public async Task<ActionResult<AvatarDto>> Reemplazar(Guid itemId, CancellationToken cancellationToken)
+    {
+        if (!UsuarioAutenticado.IntentarObtenerId(User, out Guid usuarioId)) return Forbid();
+        return Ok(await _avatares.EquiparAsync(usuarioId, itemId, cancellationToken, reemplazar: true));
+    }
     [HttpDelete("items/{itemId}/desequipar")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -90,3 +96,4 @@ public class AvatarController : ControllerBase
         return NoContent();
     }
 }
+

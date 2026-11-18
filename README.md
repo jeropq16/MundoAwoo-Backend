@@ -39,6 +39,8 @@ Las reglas para desbloquear y equipar ítems están en `UsuarioService` y `Avata
 
 Requisitos: SDK .NET 9 y MySQL. Configura `ConnectionStrings:Awoorld` y `Jwt:SigningKey` en User Secrets del proyecto Api o en variables de entorno. La clave JWT debe tener al menos 32 bytes; la base local se llama `awoorld`.
 
+[Instalación local verificada de MySQL y Workbench](docs/09-instalacion-local-mysql.md).
+
 ```bash
 dotnet restore MundoAwoo.sln
 dotnet build MundoAwoo.sln

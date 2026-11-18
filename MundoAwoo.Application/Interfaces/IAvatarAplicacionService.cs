@@ -11,6 +11,7 @@ public interface IAvatarAplicacionService
         CancellationToken cancellationToken = default);
     Task<AvatarDto> CambiarApariencia3DAsync(Guid usuarioId, CambiarApariencia3DDto datos,
         CancellationToken cancellationToken = default);
-    Task<AvatarDto> EquiparAsync(Guid usuarioId, Guid itemId, CancellationToken cancellationToken = default);
+    Task<AvatarDto> EquiparAsync(Guid usuarioId, Guid itemId, CancellationToken cancellationToken = default, bool reemplazar = false);
     Task DesequiparAsync(Guid usuarioId, Guid itemId, CancellationToken cancellationToken = default);
 }
+

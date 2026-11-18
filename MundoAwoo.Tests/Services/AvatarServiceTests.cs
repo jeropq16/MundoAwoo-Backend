@@ -14,6 +14,23 @@ public class AvatarServiceTests
     public AvatarServiceTests() => _avatares = new AvatarService(_usuarios);
 
     [Fact]
+    public void Reemplazar_ValidaDesbloqueoYConservaUnaSolaPrenda()
+    {
+        var usuario = _usuarios.Crear("Fan");
+        var avatar = _avatares.Crear(usuario.Id);
+        var primera = CrearCamiseta("Primera");
+        var segunda = CrearCamiseta("Segunda");
+        _usuarios.DesbloquearItem(usuario, primera);
+        _avatares.Equipar(avatar, primera, usuario);
+        var registro = Assert.Single(avatar.ItemsEquipados).Id;
+        Assert.Throws<InvalidOperationException>(() => _avatares.Equipar(avatar, segunda, usuario, reemplazar: true));
+        Assert.Equal(primera.Id, Assert.Single(avatar.ItemsEquipados).ItemDeAvatarId);
+        _usuarios.DesbloquearItem(usuario, segunda);
+        _avatares.Equipar(avatar, segunda, usuario, reemplazar: true);
+        Assert.Equal(segunda.Id, Assert.Single(avatar.ItemsEquipados).ItemDeAvatarId);
+        Assert.Equal(registro, Assert.Single(avatar.ItemsEquipados).Id);
+    }
+    [Fact]
     public void Equipar_ItemBloqueado_NoModificaElAvatar()
     {
         var usuario = _usuarios.Crear("Fan");
@@ -149,3 +166,4 @@ public class AvatarServiceTests
             RanuraAvatar.Torso, "camiseta.png");
     }
 }
+

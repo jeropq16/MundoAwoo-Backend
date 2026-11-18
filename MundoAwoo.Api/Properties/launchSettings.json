@@ -8,6 +8,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5064",
       "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
@@ -18,6 +19,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7018;http://localhost:5064",
       "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }

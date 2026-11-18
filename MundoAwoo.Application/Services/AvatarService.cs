@@ -74,7 +74,7 @@ public class AvatarService : IAvatarService
         return valor;
     }
 
-    public void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario)
+    public void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario, bool reemplazar = false)
     {
         ArgumentNullException.ThrowIfNull(avatar);
         ArgumentNullException.ThrowIfNull(item);
@@ -85,7 +85,13 @@ public class AvatarService : IAvatarService
         if (!_usuarios.TieneItemDesbloqueado(propietario, item.Id))
             throw new InvalidOperationException("Debes desbloquear el ítem antes de equiparlo.");
         if (avatar.ItemsEquipados.Any(equipado => equipado.ItemDeAvatarId == item.Id)) return;
-        if (avatar.ItemsEquipados.Any(equipado => equipado.Ranura == item.Ranura))
+        var anterior = avatar.ItemsEquipados.FirstOrDefault(equipado => equipado.Ranura == item.Ranura);
+        if (anterior is not null && reemplazar)
+        {
+            anterior.ItemDeAvatarId = item.Id;
+            return;
+        }
+        if (anterior is not null)
             throw new InvalidOperationException("La ranura está ocupada. Desequipa su ítem primero.");
 
         avatar.ItemsEquipados.Add(new ItemEquipado
@@ -105,3 +111,4 @@ public class AvatarService : IAvatarService
         if (equipado is not null) avatar.ItemsEquipados.Remove(equipado);
     }
 }
+

@@ -66,7 +66,7 @@ public class AvatarAplicacionService : IAvatarAplicacionService
     }
 
     public async Task<AvatarDto> EquiparAsync(Guid usuarioId, Guid itemId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool reemplazar = false)
     {
         if (itemId == Guid.Empty)
             throw new ArgumentException("El identificador del ítem es obligatorio.", nameof(itemId));
@@ -79,7 +79,7 @@ public class AvatarAplicacionService : IAvatarAplicacionService
 
         try
         {
-            _avatarService.Equipar(avatar, item, propietario);
+            _avatarService.Equipar(avatar, item, propietario, reemplazar);
         }
         catch (InvalidOperationException excepcion)
         {
@@ -151,3 +151,4 @@ public class AvatarAplicacionService : IAvatarAplicacionService
         };
     }
 }
+

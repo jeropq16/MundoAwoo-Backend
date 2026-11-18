@@ -9,6 +9,7 @@ public interface IAvatarService
     void CambiarColorFondo(Avatar avatar, ColorHex color);
     void CambiarEstilo3D(Avatar avatar, string personaje, bool chaquetaGhetto, bool chaquetaQueen);
     void CambiarApariencia3D(Avatar avatar, string personaje, string pelo, string barba, string tatuajes, ColorHex colorCabello);
-    void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario);
+    void Equipar(Avatar avatar, ItemDeAvatar item, Usuario propietario, bool reemplazar = false);
     void Desequipar(Avatar avatar, Guid itemDeAvatarId);
 }
+
